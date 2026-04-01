@@ -3,13 +3,13 @@ builder = "dockerfile"
 
 [[services]]
 name = "goverde-api"
-source = "apps/api"
+dockerfilePath = "apps/api/Dockerfile"
 healthcheckPath = "/health"
 
 [[services]]
 name = "goverde-web"
-source = "apps/web"
+dockerfilePath = "apps/web/Dockerfile"
 
 [[services]]
 name = "goverde-portal"
-source = "apps/portal"
+dockerfilePath = "apps/portal/Dockerfile"
