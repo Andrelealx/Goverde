@@ -1,14 +1,21 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+ARG VITE_API_URL
+ARG VITE_TENANT_SLUG
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_TENANT_SLUG=$VITE_TENANT_SLUG
+
 COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/portal/ ./apps/portal/
+
 RUN npm ci --workspace=packages/shared --workspace=apps/portal
 RUN npm run build --workspace=packages/shared
 RUN npm run build --workspace=apps/portal
 
 FROM nginx:alpine
 COPY --from=builder /app/apps/portal/dist /usr/share/nginx/html
-COPY apps/portal/nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/portal/nginx.conf /etc/nginx/templates/default.conf.template
 EXPOSE 80

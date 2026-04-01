@@ -1,18 +1,29 @@
 FROM node:20-alpine AS builder
+RUN apk add --no-cache openssl
 WORKDIR /app
+
 COPY package*.json ./
+COPY tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/api/ ./apps/api/
-RUN npm ci --workspace=apps/api
+
+RUN npm ci --workspace=packages/shared --workspace=apps/api
+RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
+RUN npm run build --workspace=packages/shared
 RUN npm run build --workspace=apps/api
+RUN npm prune --omit=dev
 
 FROM node:20-alpine
+RUN apk add --no-cache openssl
 WORKDIR /app
+
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/package*.json ./
 COPY --from=builder /app/apps/api/prisma ./prisma
-RUN npm ci --omit=dev
-RUN npx prisma generate
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
+
 RUN mkdir -p uploads
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
+CMD ["node", "dist/server.js"]
