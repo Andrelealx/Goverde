@@ -1,6 +1,6 @@
 [build]
 builder = "RAILPACK"
-buildCommand = "npm ci && npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build --workspace=packages/shared && npm run build --workspace=apps/api"
+buildCommand = "npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build --workspace=packages/shared && npm run build --workspace=apps/api"
 
 [deploy]
 healthcheckPath = "/health"
