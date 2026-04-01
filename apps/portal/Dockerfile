@@ -1,9 +1,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
+COPY tsconfig.base.json ./
 COPY packages/ ./packages/
 COPY apps/portal/ ./apps/portal/
-RUN npm ci --workspace=apps/portal
+RUN npm ci --workspace=packages/shared --workspace=apps/portal
+RUN npm run build --workspace=packages/shared
 RUN npm run build --workspace=apps/portal
 
 FROM nginx:alpine
