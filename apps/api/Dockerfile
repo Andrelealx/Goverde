@@ -7,6 +7,7 @@ RUN npm ci --workspace=apps/api
 RUN npm run build --workspace=apps/api
 
 FROM node:20-alpine
+RUN apk add --no-cache openssl
 WORKDIR /app
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/package*.json ./
