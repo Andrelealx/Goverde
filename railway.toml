@@ -1,15 +1,6 @@
 [build]
-builder = "dockerfile"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.api"
 
-[[services]]
-name = "goverde-api"
-dockerfilePath = "apps/api/Dockerfile"
+[deploy]
 healthcheckPath = "/health"
-
-[[services]]
-name = "goverde-web"
-dockerfilePath = "apps/web/Dockerfile"
-
-[[services]]
-name = "goverde-portal"
-dockerfilePath = "apps/portal/Dockerfile"
