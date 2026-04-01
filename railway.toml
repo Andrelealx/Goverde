@@ -1,7 +1,1 @@
-[build]
-builder = "RAILPACK"
-buildCommand = "npx prisma generate --schema=apps/api/prisma/schema.prisma && npm run build --workspace=packages/shared && npm run build --workspace=apps/api"
-
-[deploy]
-healthcheckPath = "/health"
-startCommand = "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node apps/api/dist/server.js"
+# Config gerenciada por serviço em apps/*/railway.toml
