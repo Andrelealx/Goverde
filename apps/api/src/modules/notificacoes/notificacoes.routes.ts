@@ -61,7 +61,7 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
       }),
     ]);
 
-    const lista = [];
+    const lista: { tipo: string; mensagem: string; icone: string }[] = [];
     if (ocAbertas > 0) lista.push({ tipo: 'alerta', mensagem: `${ocAbertas} ocorrência(s) abertas nos últimos 7 dias`, icone: 'alert' });
     if (licVencendo > 0) lista.push({ tipo: 'aviso', mensagem: `${licVencendo} licença(s) vencem em até 30 dias`, icone: 'clock' });
     if (vistoriasHoje > 0) lista.push({ tipo: 'info', mensagem: `${vistoriasHoje} vistoria(s) agendada(s) para hoje`, icone: 'calendar' });
