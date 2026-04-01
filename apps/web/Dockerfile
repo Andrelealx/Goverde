@@ -15,5 +15,5 @@ RUN npm run build --workspace=apps/web
 
 FROM nginx:alpine
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
-COPY apps/web/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=builder /app/apps/web/nginx.conf /etc/nginx/templates/default.conf.template
 EXPOSE 80

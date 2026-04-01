@@ -17,5 +17,5 @@ RUN npm run build --workspace=apps/portal
 
 FROM nginx:alpine
 COPY --from=builder /app/apps/portal/dist /usr/share/nginx/html
-COPY apps/portal/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=builder /app/apps/portal/nginx.conf /etc/nginx/templates/default.conf.template
 EXPOSE 80
