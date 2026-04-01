@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply font-inter text-gray-800 bg-gray-50; }
+  h1, h2, h3 { @apply font-sora; }
+}

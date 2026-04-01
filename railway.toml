@@ -1,0 +1,15 @@
+[build]
+builder = "dockerfile"
+
+[[services]]
+name = "goverde-api"
+source = "apps/api"
+healthcheckPath = "/health"
+
+[[services]]
+name = "goverde-web"
+source = "apps/web"
+
+[[services]]
+name = "goverde-portal"
+source = "apps/portal"

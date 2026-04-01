@@ -1,0 +1,395 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── GLOBAL ───────────────────────────────────────────
+
+model Tenant {
+  id        String   @id @default(cuid())
+  nome      String
+  municipio String
+  estado    String   @db.Char(2)
+  slug      String   @unique
+  plano     Plano    @default(BASICO)
+  ativo     Boolean  @default(true)
+  criadoEm DateTime @default(now())
+
+  usuarios        Usuario[]
+  ocorrencias     Ocorrencia[]
+  licencas        LicencaAmbiental[]
+  vistorias       Vistoria[]
+  pontos          RegistroPonto[]
+  multas          AutoInfracao[]
+  documentos      Documento[]
+  atestados       Atestado[]
+  bancoHoras      BancoHoras[]
+  saldosBancoHoras SaldoBancoHoras[]
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  tenantId  String
+  nome      String
+  email     String
+  senhaHash String
+  papel     Papel    @default(FISCAL)
+  ativo     Boolean  @default(true)
+  criadoEm DateTime @default(now())
+
+  jornadaHoras       Float                @default(8)
+  toleranciaMinutos  Int                  @default(10)
+
+  tenant             Tenant               @relation(fields: [tenantId], references: [id])
+  ocorrenciasAtribu  Ocorrencia[]         @relation("FiscalOcorrencia")
+  historicos         OcorrenciaHistorico[]
+  licencasAtribuidas LicencaAmbiental[]   @relation("FiscalLicenca")
+  vistorias          Vistoria[]
+  pontos             RegistroPonto[]
+  perfilFacial       PerfilFacial?
+  atestados          Atestado[]
+  multasEmitidas     AutoInfracao[]
+  documentos         Documento[]
+  bancoHoras         BancoHoras[]
+  saldoBancoHoras    SaldoBancoHoras?
+
+  @@unique([tenantId, email])
+}
+
+// ─── OCORRÊNCIAS ──────────────────────────────────────
+
+model Ocorrencia {
+  id                  String              @id @default(cuid())
+  tenantId            String
+  protocolo           String
+  titulo              String
+  descricao           String
+  categoria           CategoriaOcorrencia
+  status              StatusOcorrencia    @default(ABERTA)
+  prioridade          Prioridade          @default(MEDIA)
+  latitude            Float?
+  longitude           Float?
+  endereco            String?
+  bairro              String?
+  nomeDenunciante     String?
+  contatoDenunciante  String?
+  fiscalResponsavelId String?
+  visivelPortal       Boolean             @default(false)
+  criadoEm           DateTime            @default(now())
+  atualizadoEm       DateTime            @updatedAt
+
+  tenant            Tenant                @relation(fields: [tenantId], references: [id])
+  fiscalResponsavel Usuario?              @relation("FiscalOcorrencia", fields: [fiscalResponsavelId], references: [id])
+  fotos             OcorrenciaFoto[]
+  historicos        OcorrenciaHistorico[]
+
+  @@unique([tenantId, protocolo])
+}
+
+model OcorrenciaFoto {
+  id           String   @id @default(cuid())
+  ocorrenciaId String
+  url          String
+  nomeArquivo  String
+  criadoEm    DateTime @default(now())
+
+  ocorrencia Ocorrencia @relation(fields: [ocorrenciaId], references: [id], onDelete: Cascade)
+}
+
+model OcorrenciaHistorico {
+  id             String            @id @default(cuid())
+  ocorrenciaId   String
+  usuarioId      String?
+  statusAnterior StatusOcorrencia?
+  statusNovo     StatusOcorrencia
+  comentario     String?
+  visivelCidadao Boolean           @default(false)
+  criadoEm      DateTime          @default(now())
+
+  ocorrencia Ocorrencia @relation(fields: [ocorrenciaId], references: [id], onDelete: Cascade)
+  usuario    Usuario?   @relation(fields: [usuarioId], references: [id])
+}
+
+// ─── LICENCIAMENTO ────────────────────────────────────
+
+model LicencaAmbiental {
+  id                  String        @id @default(cuid())
+  tenantId            String
+  protocolo           String
+  tipo                TipoLicenca
+  requerente          String
+  cpfCnpj             String
+  atividade           String
+  endereco            String
+  status              StatusLicenca @default(SOLICITADA)
+  dataValidade        DateTime?
+  fiscalResponsavelId String?
+  criadoEm           DateTime      @default(now())
+  atualizadoEm       DateTime      @updatedAt
+
+  tenant            Tenant    @relation(fields: [tenantId], references: [id])
+  fiscalResponsavel Usuario?  @relation("FiscalLicenca", fields: [fiscalResponsavelId], references: [id])
+  vistorias         Vistoria[]
+
+  @@unique([tenantId, protocolo])
+}
+
+model Vistoria {
+  id            String         @id @default(cuid())
+  tenantId      String
+  licencaId     String?
+  ocorrenciaId  String?
+  fiscalId      String
+  dataAgendada  DateTime
+  dataRealizada DateTime?
+  status        StatusVistoria @default(AGENDADA)
+  observacoes   String?
+  criadoEm     DateTime       @default(now())
+
+  tenant  Tenant            @relation(fields: [tenantId], references: [id])
+  licenca LicencaAmbiental? @relation(fields: [licencaId], references: [id])
+  fiscal  Usuario           @relation(fields: [fiscalId], references: [id])
+}
+
+// ─── SEQUÊNCIAS DE PROTOCOLO ──────────────────────────
+
+model ProtocoloSequencia {
+  id       String @id @default(cuid())
+  tenantId String
+  tipo     String
+  ano      Int
+  ultimo   Int    @default(0)
+
+  @@unique([tenantId, tipo, ano])
+}
+
+// ─── PONTO ELETRÔNICO ─────────────────────────────────
+
+model PerfilFacial {
+  id          String   @id @default(cuid())
+  usuarioId   String   @unique
+  descritores Json
+  fotoUrl     String
+  criadoEm   DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+}
+
+model RegistroPonto {
+  id                String    @id @default(cuid())
+  usuarioId         String
+  tenantId          String
+  tipo              TipoPonto
+  latitude          Float
+  longitude         Float
+  precisao          Float?
+  enderecoAprox     String?
+  verificacaoFacial Boolean   @default(false)
+  similaridade      Float?
+  fotoCaptura       String?
+  criadoEm         DateTime  @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+}
+
+// ─── BANCO DE HORAS / SDR ─────────────────────────────────────────────────────
+
+model BancoHoras {
+  id               String   @id @default(cuid())
+  usuarioId        String
+  tenantId         String
+  data             DateTime @db.Date
+  horasTrabalhadas Float
+  horasEsperadas   Float
+  saldo            Float
+  observacao       String?
+  criadoEm         DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+
+  @@unique([usuarioId, data])
+}
+
+model SaldoBancoHoras {
+  id           String   @id @default(cuid())
+  usuarioId    String   @unique
+  tenantId     String
+  saldoTotal   Float    @default(0)
+  atualizadoEm DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+}
+
+model Atestado {
+  id              String         @id @default(cuid())
+  usuarioId       String
+  tenantId        String
+  dataInicio      DateTime       @db.Date
+  dataFim         DateTime       @db.Date
+  diasAfastamento Int
+  cid             String?
+  medicoNome      String?
+  arquivoUrl      String?
+  status          StatusAtestado @default(PENDENTE)
+  observacao      String?
+  criadoEm        DateTime       @default(now())
+  atualizadoEm    DateTime       @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+}
+
+// ─── AUTO INFRAÇÕES ───────────────────────────────────────────────────────────
+
+model AutoInfracao {
+  id              String             @id @default(cuid())
+  tenantId        String
+  numero          String
+  ocorrenciaId    String?
+  autuadoNome     String
+  autuadoCpfCnpj  String
+  autuadoEndereco String
+  descricao       String
+  artigos         String?
+  valorMulta      Float
+  dataInfracao    DateTime
+  dataVencimento  DateTime
+  status          StatusAutoInfracao @default(EMITIDA)
+  fiscalId        String
+  dataPagamento   DateTime?
+  criadoEm        DateTime           @default(now())
+  atualizadoEm    DateTime           @updatedAt
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
+  fiscal Usuario @relation(fields: [fiscalId], references: [id])
+
+  @@unique([tenantId, numero])
+}
+
+// ─── DOCUMENTOS ───────────────────────────────────────────────────────────────
+
+model Documento {
+  id           String        @id @default(cuid())
+  tenantId     String
+  usuarioId    String
+  tipo         TipoDocumento
+  titulo       String
+  descricao    String?
+  arquivoUrl   String
+  nomeArquivo  String
+  tamanhoBytes Int?
+  criadoEm     DateTime      @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+}
+
+// ─── REFRESH TOKENS ───────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  usuarioId String
+  token     String   @unique
+  expiresAt DateTime
+  criadoEm DateTime @default(now())
+}
+
+// ─── ENUMS ────────────────────────────────────────────
+
+enum Plano {
+  BASICO
+  PROFISSIONAL
+  ENTERPRISE
+}
+
+enum Papel {
+  ADMIN_SISTEMA
+  SECRETARIO
+  FISCAL
+  OPERADOR
+}
+
+enum CategoriaOcorrencia {
+  DESMATAMENTO
+  QUEIMADA
+  RESIDUOS_ILEGAIS
+  POLUICAO_HIDRICA
+  POLUICAO_SONORA
+  FAUNA
+  OUTRO
+}
+
+enum StatusOcorrencia {
+  ABERTA
+  EM_ANALISE
+  EM_CAMPO
+  RESOLVIDA
+  ARQUIVADA
+}
+
+enum Prioridade {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum TipoLicenca {
+  INSTALACAO
+  OPERACAO
+  LOCALIZACAO
+  SIMPLIFICADA
+}
+
+enum StatusLicenca {
+  SOLICITADA
+  EM_ANALISE
+  VISTORIA_AGENDADA
+  APROVADA
+  REPROVADA
+  CANCELADA
+  VENCIDA
+}
+
+enum StatusVistoria {
+  AGENDADA
+  REALIZADA
+  CANCELADA
+}
+
+enum TipoPonto {
+  ENTRADA
+  SAIDA
+  ALMOCO_SAIDA
+  ALMOCO_VOLTA
+}
+
+enum StatusAtestado {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+enum StatusAutoInfracao {
+  EMITIDA
+  NOTIFICADA
+  PAGA
+  CANCELADA
+  VENCIDA
+}
+
+enum TipoDocumento {
+  LICENCA
+  AUTO_INFRACAO
+  RELATORIO
+  OFICIO
+  OUTRO
+}

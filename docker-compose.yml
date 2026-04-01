@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: goverde
+      POSTGRES_USER: goverde
+      POSTGRES_PASSWORD: goverde123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goverde"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://goverde:goverde123@db:5432/goverde
+      JWT_SECRET: dev_secret_troque_em_producao
+      JWT_REFRESH_SECRET: dev_refresh_secret_troque_em_producao
+      NODE_ENV: development
+      PORT: 3000
+      UPLOAD_STORAGE: local
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages:/app/packages
+      - api_uploads:/app/apps/api/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_PORTAL_URL: http://localhost:5174
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./packages:/app/packages
+    depends_on:
+      - api
+
+  portal:
+    build:
+      context: .
+      dockerfile: apps/portal/Dockerfile.dev
+    ports:
+      - "5174:5174"
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_TENANT_SLUG: guapimirim
+    volumes:
+      - ./apps/portal/src:/app/apps/portal/src
+      - ./packages:/app/packages
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  api_uploads:
