@@ -15,4 +15,4 @@ RUN npm ci --omit=dev
 RUN npx prisma generate
 RUN mkdir -p uploads
 EXPOSE 3000
-CMD ["node", "dist/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
