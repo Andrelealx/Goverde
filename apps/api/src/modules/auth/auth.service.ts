@@ -63,14 +63,18 @@ export async function login(email: string, senha: string) {
 export async function refresh(refreshToken: string) {
   const stored = await prisma.refreshToken.findUnique({
     where: { token: refreshToken },
-    include: {
-      usuario: {
-        include: { tenant: { select: { ativo: true } } },
-      },
-    },
   });
 
-  if (!stored || stored.expiresAt < new Date() || !stored.usuario.ativo || !stored.usuario.tenant.ativo) {
+  if (!stored || stored.expiresAt < new Date()) {
+    throw new AppError('Refresh token inválido ou expirado', 401);
+  }
+
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: stored.usuarioId },
+    include: { tenant: { select: { ativo: true } } },
+  });
+
+  if (!usuario || !usuario.ativo || !usuario.tenant.ativo) {
     throw new AppError('Refresh token inválido ou expirado', 401);
   }
 
@@ -88,9 +92,9 @@ export async function refresh(refreshToken: string) {
 
   const payload: JwtPayload = {
     sub: stored.usuarioId,
-    tenantId: stored.usuario.tenantId,
-    papel: stored.usuario.papel as JwtPayload['papel'],
-    email: stored.usuario.email,
+    tenantId: usuario.tenantId,
+    papel: usuario.papel as JwtPayload['papel'],
+    email: usuario.email,
   };
 
   const accessToken = gerarAccessToken(payload);

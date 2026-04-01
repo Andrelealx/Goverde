@@ -424,6 +424,7 @@ ${contexto?.tela ? `- Tela atual: ${contexto.tela}` : ''}`;
 
       // Executa cada função
       for (const toolCall of msg.tool_calls) {
+        if (toolCall.type !== 'function') continue;
         const nome = toolCall.function.name;
         const input = JSON.parse(toolCall.function.arguments);
 
