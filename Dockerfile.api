@@ -1,7 +1,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# cache bust: v3
+# cache bust: v4
 COPY package*.json ./
 COPY tsconfig.base.json ./
 COPY packages/ ./packages/
@@ -19,6 +19,8 @@ COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/package*.json ./
 COPY --from=builder /app/apps/api/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
 RUN npx prisma generate
 RUN mkdir -p uploads
 EXPOSE 3000
