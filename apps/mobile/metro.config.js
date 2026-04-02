@@ -12,11 +12,21 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-// Força uma única instância de React e React Native
-// evita "Invalid hook call" causado por duplicata em monorepo
-config.resolver.extraNodeModules = {
-  'react': path.resolve(projectRoot, 'node_modules/react'),
-  'react-native': path.resolve(projectRoot, 'node_modules/react-native'),
+// Intercepta TODOS os imports de React (inclusive de pacotes externos como zustand)
+// e força a resolução a partir do node_modules local do app mobile,
+// evitando instâncias duplicadas que quebram hooks.
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (
+    moduleName === 'react' ||
+    moduleName === 'react/jsx-runtime' ||
+    moduleName === 'react/jsx-dev-runtime'
+  ) {
+    return {
+      filePath: require.resolve(moduleName, { paths: [projectRoot] }),
+      type: 'sourceFile',
+    };
+  }
+  return context.resolveRequest(context, moduleName, platform);
 };
 
 module.exports = config;
