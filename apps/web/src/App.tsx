@@ -13,6 +13,8 @@ import Configuracoes from './pages/Configuracoes';
 import Ponto from './pages/Ponto';
 import Multas from './pages/Multas';
 import Agenda from './pages/Agenda';
+import Desempenho from './pages/Desempenho';
+import Auditoria from './pages/Auditoria';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { usuario } = useAuthStore();
@@ -48,6 +50,14 @@ export default function App() {
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route
+            path="desempenho"
+            element={
+              <RoteProtegida roles={['SECRETARIO', 'ADMIN_SISTEMA']}>
+                <Desempenho />
+              </RoteProtegida>
+            }
+          />
           <Route path="ocorrencias" element={<Ocorrencias />} />
           <Route path="ocorrencias/nova" element={<NovaOcorrencia />} />
           <Route path="ocorrencias/:id" element={<DetalheOcorrencia />} />
@@ -61,6 +71,14 @@ export default function App() {
             element={
               <RoteProtegida roles={['SECRETARIO', 'ADMIN_SISTEMA']}>
                 <Usuarios />
+              </RoteProtegida>
+            }
+          />
+          <Route
+            path="auditoria"
+            element={
+              <RoteProtegida roles={['SECRETARIO', 'ADMIN_SISTEMA']}>
+                <Auditoria />
               </RoteProtegida>
             }
           />

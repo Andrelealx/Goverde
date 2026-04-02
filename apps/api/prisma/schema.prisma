@@ -303,6 +303,20 @@ model RefreshToken {
   criadoEm DateTime @default(now())
 }
 
+// ─── AUDITORIA ────────────────────────────────────────────────────────────────
+
+model LogAuditoria {
+  id         String   @id @default(cuid())
+  tenantId   String
+  usuarioId  String?
+  acao       String
+  entidade   String
+  entidadeId String?
+  detalhes   Json?
+  ip         String?
+  criadoEm  DateTime @default(now())
+}
+
 // ─── ENUMS ────────────────────────────────────────────
 
 enum Plano {

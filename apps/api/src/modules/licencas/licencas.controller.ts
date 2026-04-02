@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 import { criarLicencaSchema, atualizarStatusLicencaSchema, atribuirFiscalSchema } from '@goverde/shared';
 import * as service from './licencas.service';
+import * as auditoria from '../auditoria/auditoria.service';
 
 export async function listar(req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -49,6 +50,15 @@ export async function atualizarStatus(req: AuthRequest, res: Response, next: Nex
   try {
     const dados = atualizarStatusLicencaSchema.parse(req.body);
     const licenca = await service.atualizarStatus(req.usuario!.tenantId, req.params.id, dados);
+    auditoria.registrar({
+      tenantId: req.usuario!.tenantId,
+      usuarioId: req.usuario!.sub,
+      acao: 'STATUS_ATUALIZADO',
+      entidade: 'LicencaAmbiental',
+      entidadeId: req.params.id,
+      detalhes: { novoStatus: dados.status },
+      ip: req.ip,
+    });
     res.json(licenca);
   } catch (err) {
     next(err);

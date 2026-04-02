@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { Response, NextFunction } from 'express';
-import { autenticar } from '../../middlewares/auth.middleware';
+import { autenticar, autorizar } from '../../middlewares/auth.middleware';
 import { validarTenant } from '../../middlewares/tenant.middleware';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 import * as service from './dashboard.service';
@@ -43,5 +43,18 @@ router.get('/ocorrencias-por-categoria', async (req: AuthRequest, res: Response,
     next(err);
   }
 });
+
+router.get(
+  '/desempenho',
+  autorizar('SECRETARIO', 'ADMIN_SISTEMA'),
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const data = await service.desempenho(req.usuario!.tenantId);
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 export default router;

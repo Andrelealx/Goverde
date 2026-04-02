@@ -19,6 +19,7 @@ import atestadosRoutes from './modules/atestados/atestados.routes';
 import multasRoutes from './modules/multas/multas.routes';
 import documentosRoutes from './modules/documentos/documentos.routes';
 import iaRoutes from './modules/ia/ia.routes';
+import auditoriaRoutes from './modules/auditoria/auditoria.routes';
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/atestados', atestadosRoutes);
 app.use('/api/multas', multasRoutes);
 app.use('/api/documentos', documentosRoutes);
 app.use('/api/ia', iaRoutes);
+app.use('/api/auditoria', auditoriaRoutes);
 
 app.use(errorHandler);
 

@@ -3,6 +3,7 @@ import { AuthRequest } from '../../middlewares/auth.middleware';
 import { criarUsuarioSchema, atualizarUsuarioSchema } from '@goverde/shared';
 import * as service from './usuarios.service';
 import { z } from 'zod';
+import * as auditoria from '../auditoria/auditoria.service';
 
 export async function listar(req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -17,6 +18,15 @@ export async function criar(req: AuthRequest, res: Response, next: NextFunction)
   try {
     const dados = criarUsuarioSchema.parse(req.body);
     const usuario = await service.criar(req.usuario!.tenantId, dados);
+    auditoria.registrar({
+      tenantId: req.usuario!.tenantId,
+      usuarioId: req.usuario!.sub,
+      acao: 'USUARIO_CRIADO',
+      entidade: 'Usuario',
+      entidadeId: usuario.id,
+      detalhes: { nome: usuario.nome, papel: usuario.papel },
+      ip: req.ip,
+    });
     res.status(201).json(usuario);
   } catch (err) {
     next(err);

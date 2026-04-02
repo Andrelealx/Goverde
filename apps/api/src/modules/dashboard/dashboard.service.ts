@@ -78,3 +78,90 @@ export async function ocorrenciasPorCategoria(tenantId: string) {
 
   return resultado.map((r) => ({ categoria: r.categoria, total: Number(r.total) }));
 }
+
+export async function desempenho(tenantId: string) {
+  const agora = new Date();
+  const inicioMesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
+  const inicioMesAnterior = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+  const fimMesAnterior = new Date(agora.getFullYear(), agora.getMonth(), 0);
+
+  const [
+    ocMesAtual,
+    ocMesAnterior,
+    resolvidasMesAtual,
+    resolvidasMesAnterior,
+    multasMesAtual,
+    multasPagasMesAtual,
+    vistoriasMesAtual,
+    vistoriasRealizadasMesAtual,
+    topFiscais,
+    multasResumo,
+  ] = await prisma.$transaction([
+    prisma.ocorrencia.count({ where: { tenantId, criadoEm: { gte: inicioMesAtual } } }),
+    prisma.ocorrencia.count({ where: { tenantId, criadoEm: { gte: inicioMesAnterior, lte: fimMesAnterior } } }),
+    prisma.ocorrencia.count({ where: { tenantId, status: 'RESOLVIDA', atualizadoEm: { gte: inicioMesAtual } } }),
+    prisma.ocorrencia.count({ where: { tenantId, status: 'RESOLVIDA', atualizadoEm: { gte: inicioMesAnterior, lte: fimMesAnterior } } }),
+    prisma.autoInfracao.count({ where: { tenantId, criadoEm: { gte: inicioMesAtual } } }),
+    prisma.autoInfracao.count({ where: { tenantId, status: 'PAGA', criadoEm: { gte: inicioMesAtual } } }),
+    prisma.vistoria.count({ where: { tenantId, criadoEm: { gte: inicioMesAtual } } }),
+    prisma.vistoria.count({ where: { tenantId, status: 'REALIZADA', criadoEm: { gte: inicioMesAtual } } }),
+    prisma.ocorrencia.groupBy({
+      by: ['fiscalResponsavelId'],
+      where: { tenantId, status: 'RESOLVIDA', fiscalResponsavelId: { not: null } },
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 5,
+    }),
+    prisma.autoInfracao.aggregate({
+      where: { tenantId },
+      _sum: { valorMulta: true },
+    }),
+  ]);
+
+  // Buscar nomes dos fiscais
+  const fiscalIds = topFiscais.map((f) => f.fiscalResponsavelId!);
+  const fiscaisNomes = await prisma.usuario.findMany({
+    where: { id: { in: fiscalIds } },
+    select: { id: true, nome: true },
+  });
+  const nomePorId = Object.fromEntries(fiscaisNomes.map((f) => [f.id, f.nome]));
+
+  return {
+    ocorrencias: {
+      mesAtual: ocMesAtual,
+      mesAnterior: ocMesAnterior,
+      variacaoPercent:
+        ocMesAnterior > 0
+          ? Math.round(((ocMesAtual - ocMesAnterior) / ocMesAnterior) * 100)
+          : null,
+    },
+    resolucoes: {
+      mesAtual: resolvidasMesAtual,
+      mesAnterior: resolvidasMesAnterior,
+      variacaoPercent:
+        resolvidasMesAnterior > 0
+          ? Math.round(((resolvidasMesAtual - resolvidasMesAnterior) / resolvidasMesAnterior) * 100)
+          : null,
+    },
+    multas: {
+      mesAtual: multasMesAtual,
+      pagas: multasPagasMesAtual,
+      taxaPagamento:
+        multasMesAtual > 0 ? Math.round((multasPagasMesAtual / multasMesAtual) * 100) : 0,
+      totalArrecadado: multasResumo._sum.valorMulta ?? 0,
+    },
+    vistorias: {
+      mesAtual: vistoriasMesAtual,
+      realizadas: vistoriasRealizadasMesAtual,
+      taxaRealizacao:
+        vistoriasMesAtual > 0
+          ? Math.round((vistoriasRealizadasMesAtual / vistoriasMesAtual) * 100)
+          : 0,
+    },
+    topFiscais: topFiscais.map((f) => ({
+      fiscalId: f.fiscalResponsavelId!,
+      nome: nomePorId[f.fiscalResponsavelId!] ?? 'Desconhecido',
+      resolucoes: f._count.id,
+    })),
+  };
+}

@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, AlertTriangle, FileText, CalendarDays,
   Users, Settings, LogOut, Leaf, Fingerprint, ChevronLeft, ChevronRight, Scale, Calendar,
+  TrendingUp, ShieldCheck,
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +18,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/desempenho', label: 'Desempenho', icon: TrendingUp, roles: ['SECRETARIO', 'ADMIN_SISTEMA'] },
   { to: '/ocorrencias', label: 'Ocorrências', icon: AlertTriangle },
   { to: '/licencas', label: 'Licenças', icon: FileText },
   { to: '/vistorias', label: 'Vistorias', icon: CalendarDays },
@@ -24,6 +26,7 @@ const navItems: NavItem[] = [
   { to: '/multas', label: 'Auto de Infração', icon: Scale },
   { to: '/agenda', label: 'Agenda', icon: Calendar },
   { to: '/usuarios', label: 'Usuários', icon: Users, roles: ['SECRETARIO', 'ADMIN_SISTEMA'] },
+  { to: '/auditoria', label: 'Auditoria', icon: ShieldCheck, roles: ['SECRETARIO', 'ADMIN_SISTEMA'] },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 

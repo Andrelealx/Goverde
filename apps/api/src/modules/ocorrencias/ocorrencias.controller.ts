@@ -7,6 +7,7 @@ import {
   filtrosOcorrenciaSchema,
 } from '@goverde/shared';
 import * as service from './ocorrencias.service';
+import * as auditoria from '../auditoria/auditoria.service';
 
 export async function listar(req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -49,6 +50,15 @@ export async function atualizarStatus(req: AuthRequest, res: Response, next: Nex
       req.usuario!.sub,
       dados
     );
+    auditoria.registrar({
+      tenantId: req.usuario!.tenantId,
+      usuarioId: req.usuario!.sub,
+      acao: 'STATUS_ATUALIZADO',
+      entidade: 'Ocorrencia',
+      entidadeId: req.params.id,
+      detalhes: { novoStatus: dados.status },
+      ip: req.ip,
+    });
     res.json(ocorrencia);
   } catch (err) {
     next(err);
