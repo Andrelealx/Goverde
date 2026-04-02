@@ -161,7 +161,7 @@ export async function desempenho(tenantId: string) {
     topFiscais: topFiscais.map((f) => ({
       fiscalId: f.fiscalResponsavelId!,
       nome: nomePorId[f.fiscalResponsavelId!] ?? 'Desconhecido',
-      resolucoes: f._count.id,
+      resolucoes: typeof f._count === 'object' ? (f._count as { id: number }).id : 0,
     })),
   };
 }
