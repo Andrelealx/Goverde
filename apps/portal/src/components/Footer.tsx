@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Leaf, Mail, Phone } from 'lucide-react';
+import { Leaf, Mail, Phone, Lock } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -35,8 +35,17 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-primary-600 text-center text-xs text-primary-300 py-4">
-        © {new Date().getFullYear()} Goverde · Todos os direitos reservados
+      <div className="border-t border-primary-600 flex items-center justify-between px-4 py-4 text-xs text-primary-300 max-w-5xl mx-auto w-full">
+        <span>© {new Date().getFullYear()} Goverde · Todos os direitos reservados</span>
+        <a
+          href={import.meta.env.VITE_WEB_URL ?? '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-primary-400 hover:text-primary-200 transition-colors"
+        >
+          <Lock size={11} />
+          Acesso de Servidores
+        </a>
       </div>
     </footer>
   );
