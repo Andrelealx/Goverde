@@ -4,4 +4,4 @@ dockerfilePath = "../../Dockerfile.api"
 
 [deploy]
 healthcheckPath = "/health"
-startCommand = "npx prisma migrate deploy; node dist/server.js"
+startCommand = "node dist/server.js"

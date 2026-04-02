@@ -36,9 +36,7 @@ app.use('/uploads', express.static(path.resolve(__dirname, '../../../uploads')))
 
 // Health check
 app.get('/health', (_req, res) => {
-  const dbUrl = process.env.DATABASE_URL ?? '';
-  const dbHost = dbUrl.match(/@([^:\/]+)/)?.[1] ?? 'unknown';
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), dbHost });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Rotas
