@@ -134,8 +134,8 @@ export default function Ocorrencias() {
                     <td className="px-4 py-3 text-gray-500">{oc.bairro ?? '—'}</td>
                     <td className="px-4 py-3">
                       {oc.visivelPortal
-                        ? <Globe size={14} className="text-green-500" title="Visível no portal" />
-                        : <EyeOff size={14} className="text-gray-300" title="Oculta do portal" />
+                        ? <Globe size={14} className="text-green-500" />
+                        : <EyeOff size={14} className="text-gray-300" />
                       }
                     </td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{formatDate(oc.criadoEm)}</td>

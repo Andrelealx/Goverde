@@ -1,13 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import * as faceapi from 'face-api.js';
 import { Camera, CheckCircle, AlertCircle, User } from 'lucide-react';
 import { useFaceApi } from '../../hooks/useFaceApi';
 import api from '../../services/api';
 
 export default function CadastroPerfil({ onConcluido }: { onConcluido?: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   const { carregado, erro: erroModelo, detectarRosto } = useFaceApi();

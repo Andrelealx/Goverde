@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as faceapi from 'face-api.js';
 import { Camera, MapPin, CheckCircle, AlertCircle, Clock, Fingerprint } from 'lucide-react';
 import { useFaceApi } from '../../hooks/useFaceApi';
 import { useGeolocalizacao } from '../../hooks/useGeolocalizacao';
@@ -27,7 +26,7 @@ export default function RegistrarPonto() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const { carregado, erro: erroModelo, detectarRosto, compararDescritores } = useFaceApi();
-  const { obter: obterLocalizacao, obtendo: obtendoGeo, erro: erroGeo } = useGeolocalizacao();
+  const { obter: obterLocalizacao } = useGeolocalizacao();
 
   const [etapa, setEtapa] = useState<'aguardando' | 'camera' | 'verificando' | 'sucesso' | 'falha'>('aguardando');
   const [msg, setMsg] = useState('');
@@ -307,7 +306,7 @@ export default function RegistrarPonto() {
           <p className="text-sm text-gray-400 text-center py-8">Nenhum registro hoje.</p>
         ) : (
           <div className="space-y-2">
-            {pontosHoje.map((p: any, i: number) => (
+            {pontosHoje.map((p: any) => (
               <div key={p.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 <div className={`w-2.5 h-2.5 rounded-full ${tipoColor[p.tipo] ?? 'bg-gray-400'}`} />
                 <div className="flex-1">
