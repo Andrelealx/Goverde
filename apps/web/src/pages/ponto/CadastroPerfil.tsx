@@ -6,7 +6,6 @@ import api from '../../services/api';
 
 export default function CadastroPerfil({ onConcluido }: { onConcluido?: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   const { carregado, erro: erroModelo, detectarRosto } = useFaceApi();

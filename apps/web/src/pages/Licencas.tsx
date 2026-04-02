@@ -103,10 +103,10 @@ export default function Licencas() {
                           <div className="flex items-center gap-1.5">
                             <span className="text-xs">{formatDate(lic.dataValidade)}</span>
                             {vencendoEmBreve && (
-                              <AlertCircle size={14} className="text-warning" title={`Vence em ${dias} dias`} />
+                              <AlertCircle size={14} className="text-warning" />
                             )}
                             {dias !== null && dias < 0 && (
-                              <AlertCircle size={14} className="text-danger" title="Vencida" />
+                              <AlertCircle size={14} className="text-danger" />
                             )}
                           </div>
                         ) : (
