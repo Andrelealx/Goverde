@@ -12,10 +12,24 @@ import Usuarios from './pages/Usuarios';
 import Configuracoes from './pages/Configuracoes';
 import Ponto from './pages/Ponto';
 import Multas from './pages/Multas';
+import Agenda from './pages/Agenda';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { usuario } = useAuthStore();
   if (!usuario) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function RoteProtegida({
+  children,
+  roles,
+}: {
+  children: React.ReactNode;
+  roles: string[];
+}) {
+  const { usuario } = useAuthStore();
+  if (!usuario) return <Navigate to="/login" replace />;
+  if (!roles.includes(usuario.papel)) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 
@@ -41,7 +55,15 @@ export default function App() {
           <Route path="vistorias" element={<Vistorias />} />
           <Route path="ponto" element={<Ponto />} />
           <Route path="multas" element={<Multas />} />
-          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="agenda" element={<Agenda />} />
+          <Route
+            path="usuarios"
+            element={
+              <RoteProtegida roles={['SECRETARIO', 'ADMIN_SISTEMA']}>
+                <Usuarios />
+              </RoteProtegida>
+            }
+          />
           <Route path="configuracoes" element={<Configuracoes />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

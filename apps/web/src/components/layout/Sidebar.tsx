@@ -1,21 +1,29 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, AlertTriangle, FileText, Calendar,
-  Users, Settings, LogOut, Leaf, Fingerprint, ChevronLeft, ChevronRight, Scale,
+  LayoutDashboard, AlertTriangle, FileText, CalendarDays,
+  Users, Settings, LogOut, Leaf, Fingerprint, ChevronLeft, ChevronRight, Scale, Calendar,
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../stores/auth.store';
 import { cn } from '../../utils/cn';
 
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: React.ElementType;
+  roles?: string[];
+}
+
+const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/ocorrencias', label: 'Ocorrências', icon: AlertTriangle },
   { to: '/licencas', label: 'Licenças', icon: FileText },
-  { to: '/vistorias', label: 'Vistorias', icon: Calendar },
+  { to: '/vistorias', label: 'Vistorias', icon: CalendarDays },
   { to: '/ponto', label: 'Ponto Eletrônico', icon: Fingerprint },
   { to: '/multas', label: 'Auto de Infração', icon: Scale },
-  { to: '/usuarios', label: 'Usuários', icon: Users },
+  { to: '/agenda', label: 'Agenda', icon: Calendar },
+  { to: '/usuarios', label: 'Usuários', icon: Users, roles: ['SECRETARIO', 'ADMIN_SISTEMA'] },
   { to: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
@@ -23,6 +31,10 @@ export default function Sidebar() {
   const { usuario, logout } = useAuthStore();
   const navigate = useNavigate();
   const [colapsado, setColapsado] = useState(false);
+
+  const itemsVisiveis = navItems.filter(
+    (item) => !item.roles || item.roles.includes(usuario?.papel ?? '')
+  );
 
   return (
     <motion.aside
@@ -57,7 +69,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-0.5">
-        {navItems.map(({ to, label, icon: Icon }) => (
+        {itemsVisiveis.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

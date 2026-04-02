@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Fingerprint, User, BarChart2, Clock, FileText } from 'lucide-react';
+import { Fingerprint, User, BarChart2, Clock, FileText, Users } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuthStore } from '../stores/auth.store';
 import RegistrarPonto from './ponto/RegistrarPonto';
@@ -7,6 +7,7 @@ import CadastroPerfil from './ponto/CadastroPerfil';
 import RelatorioPonto from './ponto/RelatorioPonto';
 import EspelhoPonto from './ponto/EspelhoPonto';
 import Atestados from './ponto/Atestados';
+import GestaoEquipe from './ponto/GestaoEquipe';
 
 const abas = [
   { id: 'registrar', label: 'Registrar', icon: Fingerprint, roles: ['all'] },
@@ -14,6 +15,7 @@ const abas = [
   { id: 'espelho', label: 'Espelho', icon: Clock, roles: ['all'] },
   { id: 'atestados', label: 'Atestados', icon: FileText, roles: ['all'] },
   { id: 'relatorio', label: 'Relatório', icon: BarChart2, roles: ['SECRETARIO', 'ADMIN_SISTEMA'] },
+  { id: 'equipe', label: 'Gestão de Equipe', icon: Users, roles: ['SECRETARIO', 'ADMIN_SISTEMA'] },
 ];
 
 export default function Ponto() {
@@ -55,6 +57,7 @@ export default function Ponto() {
       {abaAtiva === 'espelho' && <EspelhoPonto />}
       {abaAtiva === 'atestados' && <Atestados />}
       {abaAtiva === 'relatorio' && <RelatorioPonto />}
+      {abaAtiva === 'equipe' && <GestaoEquipe />}
     </div>
   );
 }
