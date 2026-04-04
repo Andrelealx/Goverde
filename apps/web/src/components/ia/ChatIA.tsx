@@ -243,7 +243,7 @@ export default function ChatIA() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => { setAberto(true); setMinimizado(false); }}
-            className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-primary-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-600 transition-colors group"
+            className="fixed ia-bottom-offset right-6 z-40 w-14 h-14 bg-primary-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-600 transition-colors group"
             title="GoverdeAI"
           >
             <Sparkles size={22} />
@@ -260,7 +260,7 @@ export default function ChatIA() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] flex flex-col shadow-2xl rounded-2xl overflow-hidden border border-gray-200 bg-white"
+            className="fixed ia-bottom-offset right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] flex flex-col shadow-2xl rounded-2xl overflow-hidden border border-gray-200 bg-white"
             style={{ maxHeight: minimizado ? 'auto' : '640px' }}
           >
             {/* Header */}
