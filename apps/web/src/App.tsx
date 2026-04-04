@@ -7,6 +7,8 @@ import Ocorrencias from './pages/Ocorrencias';
 import NovaOcorrencia from './pages/NovaOcorrencia';
 import DetalheOcorrencia from './pages/DetalheOcorrencia';
 import Licencas from './pages/Licencas';
+import NovaLicenca from './pages/NovaLicenca';
+import DetalheLicenca from './pages/DetalheLicenca';
 import Vistorias from './pages/Vistorias';
 import Usuarios from './pages/Usuarios';
 import Configuracoes from './pages/Configuracoes';
@@ -62,6 +64,15 @@ export default function App() {
           <Route path="ocorrencias/nova" element={<NovaOcorrencia />} />
           <Route path="ocorrencias/:id" element={<DetalheOcorrencia />} />
           <Route path="licencas" element={<Licencas />} />
+          <Route
+            path="licencas/nova"
+            element={
+              <RoteProtegida roles={['SECRETARIO', 'ADMIN_SISTEMA', 'OPERADOR']}>
+                <NovaLicenca />
+              </RoteProtegida>
+            }
+          />
+          <Route path="licencas/:id" element={<DetalheLicenca />} />
           <Route path="vistorias" element={<Vistorias />} />
           <Route path="ponto" element={<Ponto />} />
           <Route path="multas" element={<Multas />} />

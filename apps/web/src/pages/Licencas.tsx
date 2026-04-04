@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, AlertCircle } from 'lucide-react';
 import api from '../services/api';
+import { useAuthStore } from '../stores/auth.store';
 import {
   statusLicencaLabel,
   statusLicencaColor,
@@ -30,6 +31,7 @@ const tipoLabel: Record<string, string> = {
 };
 
 export default function Licencas() {
+  const { usuario } = useAuthStore();
   const [licencas, setLicencas] = useState<Licenca[]>([]);
   const [total, setTotal] = useState(0);
   const [carregando, setCarregando] = useState(true);
@@ -46,14 +48,18 @@ export default function Licencas() {
     return differenceInDays(new Date(dataValidade), new Date());
   };
 
+  const podeCriar = ['SECRETARIO', 'ADMIN_SISTEMA', 'OPERADOR'].includes(usuario?.papel ?? '');
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">{total} licença(s)</p>
-        <Link to="/licencas/nova" className="btn-primary flex items-center gap-2">
-          <Plus size={16} />
-          Nova Licença
-        </Link>
+        {podeCriar && (
+          <Link to="/licencas/nova" className="btn-primary flex items-center gap-2">
+            <Plus size={16} />
+            Nova Licença
+          </Link>
+        )}
       </div>
 
       <div className="card p-0 overflow-hidden">
